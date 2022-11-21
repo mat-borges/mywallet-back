@@ -12,7 +12,7 @@ router.get('/wallet', getWallet);
 
 router.post('/wallet', walletSchemaVal, postWallet);
 
-router.put('/wallet', putWallet);
+router.put('/wallet/:id', walletSchemaVal, putWallet);
 
 router.delete('/wallet/:id', deleteWallet);
 

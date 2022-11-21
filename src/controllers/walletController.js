@@ -20,9 +20,9 @@ export async function getWallet(req, res) {
 		let balance = 0;
 		for (let data of wallet) {
 			if (data.type === 'income') {
-				balance += data.value;
+				balance += Number(data.value);
 			} else {
-				balance -= data.value;
+				balance -= Number(data.value);
 			}
 		}
 
@@ -46,7 +46,7 @@ export async function postWallet(req, res) {
 		await walletsCollection.insertOne({
 			userId: userId,
 			description,
-			value,
+			value: Number(value).toFixed(2),
 			type,
 			date: dateBrazil,
 		});
@@ -62,9 +62,7 @@ export async function deleteWallet(req, res) {
 	const { id } = req.params;
 
 	try {
-		console.log(token);
 		const session = await sessionsCollection.findOne({ token });
-		console.log(session);
 		const userId = JSON.stringify(session?.userId);
 		console.log('userId', userId);
 		const entry = await walletsCollection.findOne({ _id: new ObjectId(id) });
@@ -72,7 +70,6 @@ export async function deleteWallet(req, res) {
 		if (!entry) return res.sendStatus(400);
 
 		const entryUser = JSON.stringify(entry?.userId);
-		console.log('entryUser', entryUser);
 		if (userId === entryUser) {
 			await walletsCollection.deleteOne({ _id: new ObjectId(id) });
 			return res.status(200).send({ message: 'Entry deleted successfully' });
@@ -87,11 +84,27 @@ export async function deleteWallet(req, res) {
 
 export async function putWallet(req, res) {
 	const { token } = res.locals;
+	const { id } = req.params;
+	const { description, value, type } = res.locals.data;
+
 	try {
 		const session = await sessionsCollection.findOne({ token });
-		const userId = session?.userId;
+		const userId = JSON.stringify(session?.userId);
+		const entry = await walletsCollection.findOne({ _id: new ObjectId(id) });
 
-		res.status(404).send('Não implementado ainda');
+		if (!entry) return res.sendStatus(400);
+
+		const entryUser = JSON.stringify(entry?.userId);
+
+		if (userId === entryUser) {
+			await walletsCollection.updateOne(
+				{ _id: new ObjectId(id) },
+				{ $set: { description, value: Number(value).toFixed(2), type } }
+			);
+			return res.status(200).send({ message: 'Entry edited successfully' });
+		}
+
+		res.sendStatus(401);
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
