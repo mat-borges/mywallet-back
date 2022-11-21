@@ -62,7 +62,9 @@ export async function deleteWallet(req, res) {
 	const { id } = req.params;
 
 	try {
+		console.log(token);
 		const session = await sessionsCollection.findOne({ token });
+		console.log(session);
 		const userId = JSON.stringify(session?.userId);
 		console.log('userId', userId);
 		const entry = await walletsCollection.findOne({ _id: new ObjectId(id) });
