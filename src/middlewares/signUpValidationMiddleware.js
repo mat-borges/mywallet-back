@@ -6,7 +6,7 @@ export function signUpValidation(req, res, next) {
 
 	const user = {
 		name: cleanStringData(name),
-		email: cleanStringData(email),
+		email: cleanStringData(email).toLowerCase(),
 		password,
 	};
 

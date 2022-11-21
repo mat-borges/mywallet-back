@@ -4,7 +4,7 @@ import { signInSchema } from '../models/signInSchema.js';
 export function signInValidation(req, res, next) {
 	const { email, password } = req.body;
 
-	const user = { email: cleanStringData(email), password };
+	const user = { email: cleanStringData(email).toLowerCase(), password };
 
 	const { error } = signInSchema.validate(user, { abortEarly: false });
 
