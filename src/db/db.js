@@ -13,7 +13,6 @@ try {
 }
 
 const db = mongoClient.db('myWallet');
-export let userCollection = db.collection('user');
-export let walletsCollection = db.collection('wallet');
-
-export default db;
+export const userCollection = db.collection('user');
+export const walletsCollection = db.collection('wallet');
+export const sessionsCollection = db.collection('sessions');

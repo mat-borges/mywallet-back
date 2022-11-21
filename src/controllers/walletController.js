@@ -1,11 +1,33 @@
-import db, { users, wallet } from '../db.js';
+import { sessionsCollection, userCollection, walletsCollection } from '../db/db.js';
 
-import { cleanStringData } from '../index.js';
+export async function getWallet(req, res) {
+	const { token } = res.userData;
 
-export async function getWallet(req, res) {}
+	try {
+		const session = await sessionsCollection.findOne({ token });
+		const user = await userCollection.findOne({ _id: session?.userId });
 
-export async function postWallet(req, res) {}
+		if (!user) return res.sendStatus(401);
 
-export async function putWallet(req, res) {}
+		const wallet = await walletsCollection.findOne({ userId: session.userId });
 
-export async function deleteWallet(req, res) {}
+		delete user.password;
+		res.send({ user });
+	} catch (err) {
+		console.log(err);
+		res.sendStatus(500);
+	}
+	res.send({ wallet });
+}
+
+export async function postWallet(req, res) {
+	const { authorization } = req.headers;
+}
+
+export async function putWallet(req, res) {
+	const { authorization } = req.headers;
+}
+
+export async function deleteWallet(req, res) {
+	const { authorization } = req.headers;
+}

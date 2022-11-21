@@ -1,27 +1,28 @@
-import db, { userCollection } from '../db.js';
+import { sessionsCollection, userCollection } from '../db/db.js';
 
 import bcrypt from 'bcrypt';
-import { cleanStringData } from '../index.js';
-import { userSchema } from '../models/userSchema.js';
 import { v4 as uuid } from 'uuid';
 
-const token = uuid();
-
 export async function postSignIn(req, res) {
-	const { email, password } = req.body;
+	const { email, password } = res.locals.user;
 
 	try {
 		const userExists = await userCollection.findOne({ email });
-		if (!userExists) {
-			return res.sendStatus(401);
-		}
+
+		if (!userExists) return res.sendStatus(401);
 
 		const passwordOk = bcrypt.compareSync(password, userExists.password);
-		if (!passwordOk) {
-			return res.sendStatus(401);
-		}
 
-		res.status(200).send('OK');
+		if (!passwordOk) return res.status(401).send({ message: 'Senha incorreta' });
+
+		const sessionExists = await sessionsCollection.findOne({ userId: userExists._id });
+
+		if (sessionExists) return res.send({ token: sessionExists.token });
+
+		const token = uuid();
+		await sessionsCollection.insertOne({ token, userId: userExists._id });
+
+		res.send({ token });
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
@@ -29,23 +30,15 @@ export async function postSignIn(req, res) {
 }
 
 export async function postSignUp(req, res) {
-	const user = req.body;
+	const { user } = res.locals;
 
 	try {
 		const userExists = await userCollection.findOne({ email: user.email });
-		if (userExists) {
-			return res.status(409).send({ message: 'Esse email já existe' });
-		}
-
-		const { error } = userSchema.validate(user, { abortEarly: false });
-
-		if (error) {
-			const errors = error.details.map((detail) => detail.message);
-			return res.status(400).send({ message: errors });
-		}
+		if (userExists) return res.status(409).send({ message: 'Esse email já existe' });
 
 		const hashPassword = bcrypt.hashSync(user.password, 10);
 		await userCollection.insertOne({ ...user, password: hashPassword });
+
 		res.sendStatus(201);
 	} catch (err) {
 		console.log(err);
