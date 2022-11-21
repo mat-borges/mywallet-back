@@ -14,6 +14,6 @@ router.post('/wallet', walletSchemaVal, postWallet);
 
 router.put('/wallet', putWallet);
 
-router.delete('/wallet', deleteWallet);
+router.delete('/wallet/:id', deleteWallet);
 
 export default router;

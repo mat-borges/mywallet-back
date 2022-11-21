@@ -1,5 +1,6 @@
 import { sessionsCollection, walletsCollection } from '../db/db.js';
 
+import { ObjectId } from 'mongodb';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
@@ -56,20 +57,32 @@ export async function postWallet(req, res) {
 	}
 }
 
-export async function putWallet(req, res) {
+export async function deleteWallet(req, res) {
 	const { token } = res.locals;
+	const { id } = req.params;
+
 	try {
 		const session = await sessionsCollection.findOne({ token });
-		const userId = session?.userId;
+		const userId = JSON.stringify(session?.userId);
+		const entry = await walletsCollection.findOne({ _id: new ObjectId(id) });
 
-		res.status(404).send('Não implementado ainda');
+		if (!entry) return res.sendStatus(400);
+
+		const entryUser = JSON.stringify(entry?.userId);
+
+		if (userId === entryUser) {
+			await walletsCollection.deleteOne({ _id: new ObjectId(id) });
+			return res.status(200).send({ message: 'Entry deleted successfully' });
+		}
+
+		res.sendStatus(401);
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
 	}
 }
 
-export async function deleteWallet(req, res) {
+export async function putWallet(req, res) {
 	const { token } = res.locals;
 	try {
 		const session = await sessionsCollection.findOne({ token });
