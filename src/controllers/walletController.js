@@ -9,7 +9,16 @@ export async function getWallet(req, res) {
 
 		const wallet = await walletsCollection.find({ userId }).toArray();
 
-		res.send(wallet);
+		let balance = 0;
+		for (let data of wallet) {
+			if (data.type === 'income') {
+				balance += data.value;
+			} else {
+				balance -= data.value;
+			}
+		}
+
+		res.send({ wallet, balance });
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
