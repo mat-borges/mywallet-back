@@ -48,7 +48,7 @@ export async function putWallet(req, res) {
 		const session = await sessionsCollection.findOne({ token });
 		const userId = session?.userId;
 
-		res.send('Não implementado ainda');
+		res.status(404).send('Não implementado ainda');
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
@@ -61,7 +61,7 @@ export async function deleteWallet(req, res) {
 		const session = await sessionsCollection.findOne({ token });
 		const userId = session?.userId;
 
-		res.send('Não implementado ainda');
+		res.status(404).send('Não implementado ainda');
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);

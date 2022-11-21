@@ -11,18 +11,20 @@ export async function postSignIn(req, res) {
 
 		if (!userExists) return res.sendStatus(401);
 
+		const { name } = userExists;
+
 		const passwordOk = bcrypt.compareSync(password, userExists.password);
 
 		if (!passwordOk) return res.status(401).send({ message: 'Senha incorreta' });
 
 		const sessionExists = await sessionsCollection.findOne({ userId: userExists._id });
 
-		if (sessionExists) return res.send({ token: sessionExists.token });
+		if (sessionExists) return res.send({ token: sessionExists.token, name });
 
 		const token = uuid();
 		await sessionsCollection.insertOne({ token, userId: userExists._id });
 
-		res.send({ token });
+		res.send({ token, name });
 	} catch (err) {
 		console.log(err);
 		res.sendStatus(500);
