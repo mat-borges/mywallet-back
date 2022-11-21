@@ -64,12 +64,13 @@ export async function deleteWallet(req, res) {
 	try {
 		const session = await sessionsCollection.findOne({ token });
 		const userId = JSON.stringify(session?.userId);
+		console.log('userId', userId);
 		const entry = await walletsCollection.findOne({ _id: new ObjectId(id) });
 
 		if (!entry) return res.sendStatus(400);
 
 		const entryUser = JSON.stringify(entry?.userId);
-
+		console.log('entryUser', entryUser);
 		if (userId === entryUser) {
 			await walletsCollection.deleteOne({ _id: new ObjectId(id) });
 			return res.status(200).send({ message: 'Entry deleted successfully' });
