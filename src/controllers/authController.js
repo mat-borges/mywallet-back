@@ -47,3 +47,14 @@ export async function postSignUp(req, res) {
 		res.sendStatus(500);
 	}
 }
+
+export async function deleteSignOut(req, res) {
+	const { token } = res.locals;
+	try {
+		await sessionsCollection.deleteOne({ token });
+		res.sendStatus(200);
+	} catch (err) {
+		console.log(err);
+		res.sendStatus(500);
+	}
+}
